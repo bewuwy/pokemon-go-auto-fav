@@ -49,13 +49,16 @@ if len(devices) == 0:
 
 device = devices[0]
 
-device.shell('input touchscreen swipe 940 2225 940 2225 1')
-device.shell('input touchscreen swipe 800 1800 800 1800 1')
-device.shell('input touchscreen swipe 800 1800 800 1800 1')
+device.shell('input touchscreen swipe 940 2225 940 2225 10')
+device.shell('input touchscreen swipe 800 1800 800 1800 10')
+device.shell('input touchscreen swipe 800 1800 800 1800 10')
 
 n = int(input("Pokemon number: "))
+crit = 0
+faved = 0
 start_time = time.time()
 for i in range(n):
+    print(f'{i+1}/{n}')
     time.sleep(0.8)
 
     image = device.screencap()
@@ -68,28 +71,33 @@ for i in range(n):
     yel_colours = ['khaki', 'sandybrown', 'gold', 'navajowhite']
 
     fav = check_colour(image, 270, 975, yel_colours)
-    print(fav)
 
     one_star = check_colour(image, 1610, 95, yel_colours)
     two_star = check_colour(image, 1585, 160, yel_colours)
     three_star = check_colour(image, 1565, 230, yel_colours)
 
     stars = int(one_star + two_star + three_star)
-    print(stars)
+    print(f'{fav} {stars}')
 
     if stars > 1 and not fav:
         print("Adding fav")
-        device.shell('input touchscreen swipe 970 270 970 270 1')
+        device.shell('input touchscreen swipe 970 270 970 270 10')
+        crit += 1
+        faved += 1
     elif stars > 1:
         print("Already fav")
+        crit += 1
     else:
         print("Shouldn't be fav")
 
-    device.shell('input touchscreen swipe 800 1800 400 1800 100')
+    device.shell('input touchscreen swipe 800 1800 500 1800 200')
 
     print("------------------")
 
-device.shell('input touchscreen swipe 800 1800 400 1800 1')
+device.shell('input touchscreen swipe 800 1800 400 1800 10')
 
 elapsed_time = time.time() - start_time
 print(f'Analyzed {n} Pokemons in {time.strftime("%M:%S", time.gmtime(elapsed_time))}')
+print(f'About {round(int(elapsed_time)/n, 2)} seconds for one Pokemon')
+print(f'Found {crit} pokemon matching criteria and added fav to {faved} of them!')
+print(f'So about {round(crit/n, 3) * 100}% of your Pokemon are good')
