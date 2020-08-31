@@ -2,14 +2,40 @@ from ppadb.client import Client
 from PIL import Image
 import numpy
 import time
+import webcolors
+import datetime
 
 
-def check_colour(img, y, x, colour):
+def closest_colour(requested_colour):
+    min_colours = {}
+    for key, name in webcolors.css3_hex_to_names.items():
+        r_c, g_c, b_c = webcolors.hex_to_rgb(key)
+        rd = (r_c - requested_colour[0]) ** 2
+        gd = (g_c - requested_colour[1]) ** 2
+        bd = (b_c - requested_colour[2]) ** 2
+        min_colours[(rd + gd + bd)] = name
+    return min_colours[min(min_colours.keys())]
+
+
+def get_colour_name(requested_colour):
+    try:
+        closest_name = actual_name = webcolors.rgb_to_name(requested_colour)
+    except ValueError:
+        closest_name = closest_colour(requested_colour)
+        actual_name = None
+    return actual_name, closest_name
+
+
+def check_colour(img, y, x, colours):
     px = list(img[y][x])
-    rgb = px[:3]
+    rgb = tuple(px[:3])
     res = False
+    colour_name = closest_colour(rgb)
 
-    if rgb == colour:
+    # print(rgb)
+    # print(colour_name)
+
+    if colour_name in colours:
         res = True
 
     return res
@@ -27,24 +53,29 @@ device = devices[0]
 device.shell('input touchscreen swipe 940 2225 940 2225 1')
 device.shell('input touchscreen swipe 800 1800 800 1800 1')
 device.shell('input touchscreen swipe 800 1800 800 1800 1')
-time.sleep(0.6)
 
-image = device.screencap()
-with open('screen.png', 'wb') as f:
-    f.write(image)
+for i in range(int(input("Pokemon number: "))):
+    time.sleep(0.8)
 
-image = Image.open('screen.png')
-image = numpy.array(image, dtype=numpy.uint8)
+    image = device.screencap()
+    with open('screen.png', 'wb') as f:
+        f.write(image)
 
+    image = Image.open('screen.png')
+    image = numpy.array(image, dtype=numpy.uint8)
 
-fav = check_colour(image, 1610, 90, [255, 207, 116])
-print(fav)
+    yel_colours = ['khaki', 'sandybrown', 'gold', 'navajowhite']
 
-one_star = check_colour(image, 1610, 95, [255, 204, 114])
-two_star = check_colour(image, 1585, 160, [255, 206, 116])
-three_star = check_colour(image, 1565, 230, [255, 197, 107])
+    fav = check_colour(image, 270, 975, yel_colours)
+    print(fav)
 
-stars = one_star + two_star + three_star
-print(stars)
+    one_star = check_colour(image, 1610, 95, yel_colours)
+    two_star = check_colour(image, 1585, 160, yel_colours)
+    three_star = check_colour(image, 1565, 230, yel_colours)
 
-device.shell('input touchscreen swipe 800 1800 800 1800 1')
+    stars = one_star + two_star + three_star
+    print(stars)
+
+    device.shell('input touchscreen swipe 800 1800 400 1800 100')
+
+device.shell('input touchscreen swipe 800 1800 400 1800 1')
