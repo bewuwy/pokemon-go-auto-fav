@@ -97,7 +97,11 @@ for i in range(n):
 device.shell('input touchscreen swipe 800 1800 400 1800 10')
 
 elapsed_time = time.time() - start_time
-print(f'Analyzed {n} Pokemons in {time.strftime("%M:%S", time.gmtime(elapsed_time))}')
+print(f'Analyzed {n} Pokemon/s in {time.strftime("%M:%S", time.gmtime(elapsed_time))}')
 print(f'About {round(int(elapsed_time)/n, 2)} seconds for one Pokemon')
 print(f'Found {crit} pokemon matching criteria and added fav to {faved} of them!')
 print(f'So about {round(crit/n, 3) * 100}% of your Pokemon are good')
+print("------------------")
+print(f'{round(1/(int(elapsed_time)/n), 2)} Pokemon/s')
+print(f'{round(1/(int(elapsed_time)/n)*60, 2)} Pokemon/min')
+print(f'{round(1/(int(elapsed_time)/n)*60*60, 2)} Pokemon/h')
