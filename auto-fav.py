@@ -3,7 +3,6 @@ from PIL import Image
 import numpy
 import time
 import webcolors
-import datetime
 
 
 def closest_colour(requested_colour):
@@ -54,7 +53,9 @@ device.shell('input touchscreen swipe 940 2225 940 2225 1')
 device.shell('input touchscreen swipe 800 1800 800 1800 1')
 device.shell('input touchscreen swipe 800 1800 800 1800 1')
 
-for i in range(int(input("Pokemon number: "))):
+n = int(input("Pokemon number: "))
+start_time = time.time()
+for i in range(n):
     time.sleep(0.8)
 
     image = device.screencap()
@@ -73,9 +74,22 @@ for i in range(int(input("Pokemon number: "))):
     two_star = check_colour(image, 1585, 160, yel_colours)
     three_star = check_colour(image, 1565, 230, yel_colours)
 
-    stars = one_star + two_star + three_star
+    stars = int(one_star + two_star + three_star)
     print(stars)
+
+    if stars > 1 and not fav:
+        print("Adding fav")
+        device.shell('input touchscreen swipe 970 270 970 270 1')
+    elif stars > 1:
+        print("Already fav")
+    else:
+        print("Shouldn't be fav")
 
     device.shell('input touchscreen swipe 800 1800 400 1800 100')
 
+    print("------------------")
+
 device.shell('input touchscreen swipe 800 1800 400 1800 1')
+
+elapsed_time = time.time() - start_time
+print(f'Analyzed {n} Pokemons in {time.strftime("%M:%S", time.gmtime(elapsed_time))}')
