@@ -1,5 +1,6 @@
 from ppadb.client import Client
 from PIL import Image
+from os import remove
 import numpy
 import time
 import webcolors
@@ -31,8 +32,8 @@ def check_colour(img, y, x, colours):
     res = False
     colour_name = closest_colour(rgb)
 
-    # print(rgb)
-    # print(colour_name)
+    if debug:
+        print(f'{rgb} {colour_name}')
 
     if colour_name in colours:
         res = True
@@ -54,9 +55,14 @@ device.shell('input touchscreen swipe 800 1800 800 1800 10')
 device.shell('input touchscreen swipe 800 1800 800 1800 10')
 
 n = input("Pokemon number: ")
+debug = False
 
 while not n.isnumeric():
-    n = input("Pokemon number: ")
+    if n.lower() == "debug" or debug:
+        n = input("Pokemon number (Debug Mode): ")
+        debug = True
+    else:
+        n = input("Pokemon number: ")
 n = int(n)
 
 print("------------------")
@@ -69,16 +75,20 @@ for i in range(n):
     print(f'{i + 1}/{n}')
     time.sleep(0.5)
 
+    t = time.time()
     image = device.screencap()
     with open('screen.png', 'wb') as f:
         f.write(image)
     image = Image.open('screen.png')
     image = numpy.array(image, dtype=numpy.uint8)
 
-    sc_time = time.time()
+    if debug:
+        print(f'Time to save and load screenshot: {round(time.time() - t, 3)} s')
+
     yel_colours = ['khaki', 'sandybrown', 'gold', 'navajowhite']
     red_colours = ['red', 'pink', 'lightcoral']
 
+    t = time.time()
     fav = check_colour(image, 270, 975, yel_colours)
 
     one_star = check_colour(image, 1610, 95, yel_colours)
@@ -91,24 +101,34 @@ for i in range(n):
     full_atk = check_colour(image, 1810, 475, red_colours)
     full_def = check_colour(image, 1910, 475, red_colours)
     full_hp = check_colour(image, 2010, 475, red_colours)
-    print(time.time() - sc_time)
+
+    if debug:
+        print(f'Time to check colours: {round(time.time() - t, 3)} s')
 
     if full_atk and full_def and full_hp:
         print("WOW! This Pokemon has perfect IV!")
         perfect += 1
 
     if stars > 1 and not fav:
+        t = time.time()
         print("Adding fav")
         device.shell('input touchscreen swipe 970 270 970 270 10')
         crit += 1
         faved += 1
+
+        if debug:
+            print(f'Time to add favourite: {round(time.time() - t, 3)} s')
     elif stars > 1:
         print("Already fav")
         crit += 1
     else:
         print("Shouldn't be fav")
 
-    device.shell('input touchscreen swipe 800 1800 500 1800 200')
+    t = time.time()
+    device.shell('input touchscreen swipe 800 1800 400 1800 100')
+
+    if debug:
+        print(f'Time to swipe to another pokemon: {round(time.time() - t, 3)} s')
 
     print("------------------")
 
@@ -126,6 +146,7 @@ print(f'{round(1 / (int(elapsed_time) / n), 2)} Pokemon/s')
 print(f'{round(1 / (int(elapsed_time) / n) * 60, 2)} Pokemon/min')
 print(f'{round(1 / (int(elapsed_time) / n) * 60 * 60, 2)} Pokemon/h')
 
+remove("screen.png")
 
 # Time distribution:
 # 3.0s when not adding fav
@@ -134,5 +155,5 @@ print(f'{round(1 / (int(elapsed_time) / n) * 60 * 60, 2)} Pokemon/h')
 # (0.6s - adding fav)
 # 1.5s - taking screenshot
 # 0.9s - swiping between
-# 0.6s = unknown
+# 0.5s - waiting for animation to end
 # 0.009s - checking colours
