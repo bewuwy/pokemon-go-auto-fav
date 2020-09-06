@@ -53,9 +53,16 @@ device.shell('input touchscreen swipe 940 2225 940 2225 10')
 device.shell('input touchscreen swipe 800 1800 800 1800 10')
 device.shell('input touchscreen swipe 800 1800 800 1800 10')
 
-n = int(input("Pokemon number: "))
+n = input("Pokemon number: ")
+
+while not n.isnumeric():
+    n = input("Pokemon number: ")
+n = int(n)
+
+print("------------------")
 crit = 0
 faved = 0
+perfect = 0
 start_time = time.time()
 for i in range(n):
     print(f'{i+1}/{n}')
@@ -69,15 +76,21 @@ for i in range(n):
     image = numpy.array(image, dtype=numpy.uint8)
 
     yel_colours = ['khaki', 'sandybrown', 'gold', 'navajowhite']
+    red_colours = ['red', 'pink', 'lightcoral']
 
     fav = check_colour(image, 270, 975, yel_colours)
 
     one_star = check_colour(image, 1610, 95, yel_colours)
     two_star = check_colour(image, 1585, 160, yel_colours)
     three_star = check_colour(image, 1565, 230, yel_colours)
+    hundred_percent = check_colour(image, 1510, 180, red_colours)
 
     stars = int(one_star + two_star + three_star)
     print(f'{fav} {stars}')
+
+    if hundred_percent:
+        print("WOW! This Pokemon has perfect IV!")
+        perfect += 1
 
     if stars > 1 and not fav:
         print("Adding fav")
@@ -100,6 +113,8 @@ elapsed_time = time.time() - start_time
 print(f'Analyzed {n} Pokemon/s in {time.strftime("%M:%S", time.gmtime(elapsed_time))}')
 print(f'About {round(int(elapsed_time)/n, 2)} seconds for one Pokemon')
 print(f'Found {crit} pokemon matching criteria and added fav to {faved} of them!')
+if perfect > 0:
+    print(f'Nice! You have {perfect} perfect IV Pokemon!')
 print(f'So about {round(crit/n, 3) * 100}% of your Pokemon are good')
 print("------------------")
 print(f'{round(1/(int(elapsed_time)/n), 2)} Pokemon/s')
