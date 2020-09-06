@@ -64,17 +64,18 @@ crit = 0
 faved = 0
 perfect = 0
 start_time = time.time()
+
 for i in range(n):
-    print(f'{i+1}/{n}')
-    time.sleep(0.8)
+    print(f'{i + 1}/{n}')
+    time.sleep(0.5)
 
     image = device.screencap()
     with open('screen.png', 'wb') as f:
         f.write(image)
-
     image = Image.open('screen.png')
     image = numpy.array(image, dtype=numpy.uint8)
 
+    sc_time = time.time()
     yel_colours = ['khaki', 'sandybrown', 'gold', 'navajowhite']
     red_colours = ['red', 'pink', 'lightcoral']
 
@@ -83,12 +84,16 @@ for i in range(n):
     one_star = check_colour(image, 1610, 95, yel_colours)
     two_star = check_colour(image, 1585, 160, yel_colours)
     three_star = check_colour(image, 1565, 230, yel_colours)
-    hundred_percent = check_colour(image, 1510, 180, red_colours)
 
     stars = int(one_star + two_star + three_star)
     print(f'{fav} {stars}')
 
-    if hundred_percent:
+    full_atk = check_colour(image, 1810, 475, red_colours)
+    full_def = check_colour(image, 1910, 475, red_colours)
+    full_hp = check_colour(image, 2010, 475, red_colours)
+    print(time.time() - sc_time)
+
+    if full_atk and full_def and full_hp:
         print("WOW! This Pokemon has perfect IV!")
         perfect += 1
 
@@ -111,12 +116,23 @@ device.shell('input touchscreen swipe 800 1800 400 1800 10')
 
 elapsed_time = time.time() - start_time
 print(f'Analyzed {n} Pokemon/s in {time.strftime("%M:%S", time.gmtime(elapsed_time))}')
-print(f'About {round(int(elapsed_time)/n, 2)} seconds for one Pokemon')
+print(f'About {round(int(elapsed_time) / n, 2)} seconds for one Pokemon')
 print(f'Found {crit} pokemon matching criteria and added fav to {faved} of them!')
 if perfect > 0:
     print(f'Nice! You have {perfect} perfect IV Pokemon!')
-print(f'So about {round(crit/n, 3) * 100}% of your Pokemon are good')
+print(f'So about {round(crit / n, 3) * 100}% of your Pokemon are good')
 print("------------------")
-print(f'{round(1/(int(elapsed_time)/n), 2)} Pokemon/s')
-print(f'{round(1/(int(elapsed_time)/n)*60, 2)} Pokemon/min')
-print(f'{round(1/(int(elapsed_time)/n)*60*60, 2)} Pokemon/h')
+print(f'{round(1 / (int(elapsed_time) / n), 2)} Pokemon/s')
+print(f'{round(1 / (int(elapsed_time) / n) * 60, 2)} Pokemon/min')
+print(f'{round(1 / (int(elapsed_time) / n) * 60 * 60, 2)} Pokemon/h')
+
+
+# Time distribution:
+# 3.0s when not adding fav
+# 3.6s when adding fav
+#
+# (0.6s - adding fav)
+# 1.5s - taking screenshot
+# 0.9s - swiping between
+# 0.6s = unknown
+# 0.009s - checking colours
